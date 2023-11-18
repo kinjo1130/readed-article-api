@@ -35,49 +35,55 @@ export class ArticlesService {
           }
         });
       })
-      .catch((err) => {
-        console.log(err);
-        return {
-          success: false,
-          message: 'Error',
-          statusCode: 500,
-          data: null,
-        };
-      });
+      .catch(this.handleError);
   }
-  getArticleLists(data: string): Promise<ResponseDto> {
-    console.log(data);
-    // to = '2021-01'
-    const year = Number(data.split('-')[0]);
-    const month = Number(data.split('-')[1]);
-    const startAt = new Date(year, month - 1, 1);
-    const endAt = new Date(year, month, 0);
-    return admin
-      .firestore()
-      .collection('articles')
-      .where('createdAt', '>=', startAt)
-      .where('createdAt', '<=', endAt)
-      .get()
-      .then((querySnapshot) => {
-        const data: ResponseDataDto[] = [];
-        querySnapshot.forEach((doc) => {
-          data.push(doc.data() as ResponseDataDto);
-        });
-        return {
-          success: true,
-          message: 'success',
-          statusCode: 200,
-          data: data,
-        };
-      })
-      .catch((err) => {
-        console.log(err);
-        return {
-          success: false,
-          message: 'Error',
-          statusCode: 500,
-          data: null,
-        };
-      });
+  getArticleLists(data?: string): Promise<ResponseDto> {
+    if (data) {
+      // クエリが存在する場合
+      const year = Number(data.split('-')[0]);
+      const month = Number(data.split('-')[1]);
+      const startAt = new Date(year, month - 1, 1);
+      const endAt = new Date(year, month, 0);
+
+      return admin
+        .firestore()
+        .collection('articles')
+        .where('createdAt', '>=', startAt)
+        .where('createdAt', '<=', endAt)
+        .get()
+        .then((querySnapshot) => this.createResponse(querySnapshot))
+        .catch(this.handleError);
+    } else {
+      // クエリが存在しない場合、すべてのドキュメントを取得
+      return admin
+        .firestore()
+        .collection('articles')
+        .get()
+        .then((querySnapshot) => this.createResponse(querySnapshot))
+        .catch(this.handleError);
+    }
+  }
+
+  createResponse(querySnapshot): ResponseDto {
+    const data: ResponseDataDto[] = [];
+    querySnapshot.forEach((doc) => {
+      data.push(doc.data() as ResponseDataDto);
+    });
+    return {
+      success: true,
+      message: 'success',
+      statusCode: 200,
+      data: data,
+    };
+  }
+
+  handleError(err): ResponseDto {
+    console.log(err);
+    return {
+      success: false,
+      message: 'Error',
+      statusCode: 500,
+      data: null,
+    };
   }
 }
