@@ -2,15 +2,25 @@ import { Injectable } from '@nestjs/common';
 import * as admin from 'firebase-admin';
 import { AddArticleDto } from './dto/requestAdd.dto';
 import { ResponseDataDto, ResponseDto } from './dto/response.dto';
+import { OpenGraphScraperService } from 'src/open-graph-scraper/open-graph-scraper.service';
 @Injectable()
 export class ArticlesService {
-  addArticle(data: AddArticleDto): Promise<ResponseDto> {
+  constructor(private openGraphScraperService: OpenGraphScraperService) { }
+  async addArticle(data: AddArticleDto): Promise<ResponseDto> {
+    // linkからサイト情報を抜き出す
+    const res = await this.openGraphScraperService.getOpenGraphData(
+      data.articleLink,
+    );
+    console.log(res);
     // ここでFirebaseとの疎通確認を行いたい
     return admin
       .firestore()
       .collection('articles')
       .add({
-        link: data.articleLink,
+        link: res.requestUrl,
+        siteTitle: res.ogTitle,
+        siteDescription: res.ogDescription ? res.ogDescription : '',
+        siteImage: res.ogImage ? res.ogImage[0].url : '',
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       })
       .then((docRef) => {

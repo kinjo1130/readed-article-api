@@ -13,7 +13,6 @@ export class LinebotService {
   ) {
     this.lineClient = this.configService.createLinebotClient();
   }
-  // https以外の文字列がきたら、そのまま返す
   private isHttps(url: string): boolean {
     return url.startsWith('https://');
   }

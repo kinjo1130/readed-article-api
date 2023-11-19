@@ -9,5 +9,7 @@ export type ResponseDto = {
 
 export type ResponseDataDto = {
   link: string;
+  siteTitle: string;
+  siteDescription: string;
   createdAt: Timestamp;
 };
