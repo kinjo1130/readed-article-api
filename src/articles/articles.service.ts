@@ -18,7 +18,7 @@ export class ArticlesService {
       .collection('articles')
       .add({
         link: res.requestUrl,
-        siteTitle: res.ogTitle,
+        siteTitle: res.ogTitle ? res.ogTitle : '',
         siteDescription: res.ogDescription ? res.ogDescription : '',
         siteImage: res.ogImage ? res.ogImage[0].url : '',
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
