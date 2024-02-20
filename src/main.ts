@@ -28,7 +28,13 @@ export const createNestServer = async (expressInstance) => {
   console.log(`Server is running on port http://localhost:${PORT}`);
 };
 createNestServer(server)
-  .then((v) => console.log('Nest Ready'))
+  .then(() => console.log('Nest Ready'))
   .catch((err) => console.error('Nest broken', err));
 
-export const api = functions.https.onRequest(server);
+export const api = functions
+  .runWith({
+    timeoutSeconds: 300,
+    memory: '2GB',
+  })
+  .region('asia-northeast2')
+  .https.onRequest(server);
